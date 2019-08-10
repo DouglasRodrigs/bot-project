@@ -1,16 +1,36 @@
 package controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import repository.BotRepository;
+import model.Messages;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import repository.MessagesRepository;
+
+import java.util.List;
 
 @RestController
-@RequestMapping({"/bots"})
-public class BotController {
+@RequestMapping({"/messages"})
+public class MessagesController {
 
-    private BotRepository repository;
+    private MessagesRepository repository;
 
-    BotController(BotRepository botRepository) {
-        this.repository = botRepository;
+    MessagesController(MessagesRepository messagesRepository) {
+        this.repository = messagesRepository;
     };
+
+    @GetMapping
+    public List findAll(){
+        return repository.findAll();
+    }
+
+    @GetMapping(path = {"/{conversationId}"})
+    public ResponseEntity findById(@PathVariable long conversationId){
+        return repository.findById(conversationId)
+                .map(record -> ResponseEntity.ok().body(record))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public Messages create(@RequestBody Messages messages){
+        return repository.save(messages);
+    }
 }
